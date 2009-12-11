@@ -16,5 +16,6 @@ public class UnderwaterAdventure extends Applet {
 	{
 		g.drawString("Hey Guys! Ready for some underwater adventure?", 100, 250);
 		g.drawString("Woooooo!!  Hi Mark!", 100, 300);
+		g.drawString("Woooooo!!  Hi Nat!", 100, 350);
 	}
 }
