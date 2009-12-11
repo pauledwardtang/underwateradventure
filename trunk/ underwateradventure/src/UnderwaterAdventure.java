@@ -9,7 +9,7 @@ public class UnderwaterAdventure extends Applet {
 
 	public void init()
 	{
-	setSize(500, 500);
+	setSize(650, 700);
 	}
 	
 	public void paint (Graphics g)
@@ -17,5 +17,6 @@ public class UnderwaterAdventure extends Applet {
 		g.drawString("Hey Guys! Ready for some underwater adventure?", 100, 250);
 		g.drawString("Woooooo!!  Hi Mark!", 100, 300);
 		g.drawString("Woooooo!!  Hi Nat!", 100, 350);
+		g.drawString("Working yet??", 100, 400);
 	}
 }
