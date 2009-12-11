@@ -21,5 +21,7 @@ public class UnderwaterAdventure extends Applet {
 		g.drawString("Working yet??", 100, 400);
 		g.setColor(Color.ORANGE);
 		g.fillRect(100,100,100,100);
+		g.setColor(Color.BLUE);
+		g.fillRect(200, 100, 100, 100);
 	}
 }
