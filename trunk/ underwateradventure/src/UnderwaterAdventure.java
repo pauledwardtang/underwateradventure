@@ -23,5 +23,7 @@ public class UnderwaterAdventure extends Applet {
 		g.fillRect(100,100,100,100);
 		g.setColor(Color.BLUE);
 		g.fillRect(200, 100, 100, 100);
+		g.setXORMode(Color.ORANGE);
+		g.drawString("GO GATORS!!!", 170, 150);
 	}
 }
