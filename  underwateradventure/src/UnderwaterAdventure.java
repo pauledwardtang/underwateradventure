@@ -1,4 +1,5 @@
 import java.applet.Applet;
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -18,5 +19,7 @@ public class UnderwaterAdventure extends Applet {
 		g.drawString("Woooooo!!  Hi Mark!", 100, 300);
 		g.drawString("Woooooo!!  Hi Nat!", 100, 350);
 		g.drawString("Working yet??", 100, 400);
+		g.setColor(Color.ORANGE);
+		g.fillRect(100,100,100,100);
 	}
 }
