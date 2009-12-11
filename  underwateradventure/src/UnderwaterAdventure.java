@@ -15,5 +15,6 @@ public class UnderwaterAdventure extends Applet {
 	public void paint (Graphics g)
 	{
 		g.drawString("Hey Guys! Ready for some underwater adventure?", 100, 250);
+		g.drawString("Woooooo!!  Hi Mark!", 100, 300);
 	}
 }
