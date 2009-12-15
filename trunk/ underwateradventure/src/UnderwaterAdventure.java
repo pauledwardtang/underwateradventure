@@ -15,6 +15,7 @@ public class UnderwaterAdventure extends Applet {
 	
 	public void paint (Graphics g)
 	{
+		
 		g.drawString("Hey Guys! Ready for some underwater adventure?", 100, 250);
 		g.drawString("Woooooo!!  Hi Mark!", 100, 300);
 		g.drawString("Woooooo!!  Hi Nat!", 100, 350);
@@ -25,5 +26,6 @@ public class UnderwaterAdventure extends Applet {
 		g.fillRect(200, 100, 100, 100);
 		g.setXORMode(Color.ORANGE);
 		g.drawString("GO GATORS!!!", 170, 150);
+		
 	}
 }

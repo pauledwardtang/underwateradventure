@@ -1,0 +1,11 @@
+<HTML>
+<HEAD>
+<TITLE>Underwater Adventure</TITLE>
+</HEAD>
+<BODY>
+<CENTER>
+<H1>Underwater Adventure!</H1>
+<APPLET CODE="UnderwaterAdventure.class" WIDTH=650 HEIGHT=700>
+</APPLET>
+</BODY>
+</HTML>
