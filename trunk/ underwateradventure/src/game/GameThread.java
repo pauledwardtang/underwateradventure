@@ -1,10 +1,12 @@
 package game;
 
 import java.applet.Applet;
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
 import objects.Player;
@@ -16,11 +18,14 @@ public class GameThread extends Applet implements Runnable, KeyListener{
     //the main drawing object for the back buffer
     Graphics2D graphics;
     Player player = new Player(this);
-    int appletSizeX = 600;
-    int appletSizeY = 600;
+    int appletSizeX = 1000;
+    int appletSizeY = 400;
+    AffineTransform ident = new AffineTransform();
+    boolean showBounds;
     public void init()
 	{
-    	setSize(600,600);
+    	setSize(appletSizeX,appletSizeY);
+    	addKeyListener(this);
     	backbuffer = new BufferedImage(appletSizeX, appletSizeY, BufferedImage.TYPE_INT_RGB);
 		graphics = backbuffer.createGraphics();
 		player.setGraphics(graphics);
@@ -29,8 +34,16 @@ public class GameThread extends Applet implements Runnable, KeyListener{
 		player.load("sub.png");
 	}
     public void update(Graphics g){
+    	graphics.setTransform(ident);
+    	
+    	Color C = new Color(0,0,255);
+		graphics.setColor(C);
+    	graphics.fillRect(0, 0, getSize().width, getSize().height);
     	player.draw();
     	player.transform();
+    	graphics.setColor(Color.ORANGE);
+    	if(showBounds)
+    		player.drawBounds();
 		paint(g);
 	}
 	
@@ -71,23 +84,23 @@ public class GameThread extends Applet implements Runnable, KeyListener{
 		// TODO Auto-generated method stub
 		int key = k.getKeyCode();
 		
-		switch (key){
-		case KeyEvent.VK_LEFT:
+		
+		if(KeyEvent.VK_LEFT == key)
             player.keyLeft();
-            break;
 
-        case KeyEvent.VK_RIGHT:
-        	player.keyRight();
-            break;
 
-        case KeyEvent.VK_UP:
-        	player.keyRight();
-            break;
-        
-        case KeyEvent.VK_DOWN:
-        	player.keyDown();
-        	break;
-		}
+		if(KeyEvent.VK_UP == key)
+            player.keyUp();
+
+		if(KeyEvent.VK_DOWN == key)
+            player.keyDown();
+		
+		if(KeyEvent.VK_RIGHT == key)
+            player.keyRight();
+		
+		if(KeyEvent.VK_B == key)
+			showBounds = !showBounds;
+
 	}
 	@Override
 	public void keyReleased(KeyEvent e) {

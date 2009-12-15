@@ -22,9 +22,7 @@ public class PhysicalObject {
 	
 	PhysicalObject(Applet a){
 		applet = a;
-	
 	}
-	
 	//getters and setters
 	public double getX(){
 		return x;
@@ -83,7 +81,7 @@ public class PhysicalObject {
 	//draws binding rectangle
 	public void drawBounds(){
 		Rectangle r;
-        r = new Rectangle((int)getCenterX(), (int) getCenterY(), (int) getWidth(), (int) getHeight());
+        r = new Rectangle((int)getX(), (int) getY(), (int) getWidth(), (int) getHeight());
         graphics.draw(r);
 	}
 	//scale image size
@@ -106,8 +104,8 @@ public class PhysicalObject {
 	public void transform() {
 	    at.setToIdentity();
 	    at.translate((int)getX() + getWidth()/2, (int)getY() + getHeight()/2);
-	    at.rotate(Math.toRadians(getFaceAngle()));
-	    at.scale(scaleX, scaleY);
+	    //at.rotate(Math.toRadians(getFaceAngle()));
+	    //at.scale(scaleX, scaleY);
 	    at.translate(-getWidth()/2, -getHeight()/2);
 	    }
 	public void load(String filename)
