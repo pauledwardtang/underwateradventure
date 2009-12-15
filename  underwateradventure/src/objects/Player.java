@@ -14,17 +14,17 @@ public class Player extends PhysicalObject {
 	}
 	
 	public void keyUp(){
-		setY(y+1);
+		setY(y-10);
 	}
 	public void keyDown(){
-		setY(y-1);
+		setY(y+10);
 	}
 
 	public void keyLeft(){
-		setX(x-1);
+		setX(x-10);
 	}
 	public void keyRight(){
-		setX(x-1);
+		setX(x+10);
 	}
 	
 }
