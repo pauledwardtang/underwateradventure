@@ -37,6 +37,12 @@ public class GameThread extends Applet implements Runnable, KeyListener{
     							   };	
    
 
+    
+	int currentX=0;
+	int currentY=0;
+	int lastX=0;
+	int lastY=0;
+    
     int appletSizeX = 1000;
     int appletSizeY = 400;
     AffineTransform ident = new AffineTransform();
@@ -59,8 +65,16 @@ public class GameThread extends Applet implements Runnable, KeyListener{
 		
 		for(int i=0; i<octopi_array.length; i++){
 			octopi_array[i].setGraphics(graphics);
-			octopi_array[i].setX(randomX.nextInt(1000));
-			octopi_array[i].setY(randomY.nextInt(400));
+			currentX=randomX.nextInt(1000);
+			currentY=randomY.nextInt(400);
+			octopi_array[i].load("octopi2.png");
+			if(!collisionOccured(currentX, currentY, lastX, lastY,88,88, 92, 92)){
+				octopi_array[i].setX(currentX);
+				octopi_array[i].setY(currentY);
+				
+			}
+			lastX=currentX;
+			lastY=currentY;
 		}
 		
 	}
@@ -138,6 +152,25 @@ public class GameThread extends Applet implements Runnable, KeyListener{
 			
 	
     }
+    
+    public boolean collisionOccured(int objectOneX, int objectOneY, int objectTwoX, int objectTwoY, double objectOneWidth, double objectTwoWidth, double objectOneHeight, double objectTwoHeight){
+    	for(int i=0; i<objectOneWidth; i++){
+    		for(int j=0; j<objectTwoWidth; j++){
+	    		if(objectOneX+i==objectTwoX+j){
+	    			return true;
+	    		}
+    		}
+    	}
+    	for(int u=0; u<objectOneHeight; u++){
+    		for(int v=0; v<objectTwoHeight; v++){
+	    		if(objectOneY+u==objectTwoY+v){
+	    			return true;
+	    		}
+    		}
+    	}
+    	
+    	return false;
+    }
 	@Override
 	public void keyPressed(KeyEvent k) {
 		// TODO Auto-generated method stub
@@ -171,4 +204,6 @@ public class GameThread extends Applet implements Runnable, KeyListener{
 		// TODO Auto-generated method stub
 		
 	}
+	
+	
 }
