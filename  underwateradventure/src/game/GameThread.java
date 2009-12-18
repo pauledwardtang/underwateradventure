@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.geom.AffineTransform;
@@ -26,6 +27,8 @@ public class GameThread extends Applet implements Runnable, KeyListener{
     Random randomX=new Random();
     Random randomY=new Random();
     
+    int life=500;
+    
     
     PhysicalObject octopi_array[]={	new PhysicalObject(this),
     								new PhysicalObject(this),
@@ -40,13 +43,13 @@ public class GameThread extends Applet implements Runnable, KeyListener{
     
 	int currentX=0;
 	int currentY=0;
-	int lastX=0;
-	int lastY=0;
+	int lastX;
+	int lastY;
     
     int appletSizeX = 1000;
     int appletSizeY = 400;
     AffineTransform ident = new AffineTransform();
-    boolean showBounds;
+    boolean showBounds=true;
     int change;
     
     int currentFrameOctopi=0;
@@ -58,27 +61,40 @@ public class GameThread extends Applet implements Runnable, KeyListener{
     	backbuffer = new BufferedImage(appletSizeX, appletSizeY, BufferedImage.TYPE_INT_RGB);
 		graphics = backbuffer.createGraphics();
 		player.setGraphics(graphics);
-		player.setX(appletSizeX/2);
-		player.setY(appletSizeY/2);
 		player.load("sub.png");
+		player.setX(200);
+		player.setY(175);
+		player.setWidth(122);
+		player.setHeight(70);
 		
+
+		octopi_array[0].setGraphics(graphics);
+		octopi_array[0].load("octopi2.png");
+		octopi_array[0].setWidth(88);
+		octopi_array[0].setHeight(92);
+		octopi_array[0].setX(100);
+		octopi_array[0].setY(randomY.nextInt(400));		
 		
-		for(int i=0; i<octopi_array.length; i++){
+    	for(int i=1; i<octopi_array.length; i++){
 			octopi_array[i].setGraphics(graphics);
-			currentX=randomX.nextInt(1000);
-			currentY=randomY.nextInt(400);
 			octopi_array[i].load("octopi2.png");
-			if(!collisionOccured(currentX, currentY, lastX, lastY,88,88, 92, 92)){
-				octopi_array[i].setX(currentX);
-				octopi_array[i].setY(currentY);
-				
+			octopi_array[i].setWidth(88);
+			octopi_array[i].setHeight(92);
+			octopi_array[i].setX(randomX.nextInt(1000));
+			octopi_array[i].setY(randomY.nextInt(400));
+			for(int j=0; j<i; j++){
+				while(collision(octopi_array[i].getBounds(), player.getBounds())||collision(octopi_array[i].getBounds(), octopi_array[j].getBounds())){
+					octopi_array[i].setX(randomX.nextInt(1000));
+					octopi_array[i].setY(randomY.nextInt(400));
+					
+				}
 			}
-			lastX=currentX;
-			lastY=currentY;
-		}
+			
+    	}
 		
 	}
     public void update(Graphics g){
+    	
     	graphics.setTransform(ident);
     	
     	Color C = new Color(0,0,255);
@@ -86,13 +102,30 @@ public class GameThread extends Applet implements Runnable, KeyListener{
     	graphics.fillRect(0, 0, getSize().width, getSize().height);
     	player.draw();
     	player.transform();
+    	
     	for(int i=0; i<octopi_array.length; i++){
     		transformOctopi(octopi_array[i].getX(), octopi_array[i].getY(), i);
     	}
+    	
+    	for(int i=0; i<octopi_array.length; i++){
+    		if(collision(octopi_array[i].getBounds(),player.getBounds())){
+    			life=life-1;
+    			
+    		}
+    	}
     	graphics.setColor(Color.ORANGE);
-    	if(showBounds)
+    	if(showBounds){
     		player.drawBounds();
+    		for(int i=0; i<octopi_array.length; i++){
+    			octopi_array[i].drawBounds();
+    		}
+    	}
+    	
+    	if(life<0){
+    		gameOver();
+    	}
 		paint(g);
+		
 	}
 	
 	//sets up buffered image
@@ -101,8 +134,8 @@ public class GameThread extends Applet implements Runnable, KeyListener{
 		 g.drawImage(backbuffer, 0, 0, this);
 	}
 	public void start() {
-        gameloop = new Thread(this);
-        gameloop.start();
+	        gameloop = new Thread(this);
+	        gameloop.start();
     }
   
 	//thread event
@@ -111,7 +144,7 @@ public class GameThread extends Applet implements Runnable, KeyListener{
         Thread t = Thread.currentThread();
     
         //keep going as long as the thread is alive
-        while (t == gameloop) {
+        while (t == gameloop&&life>=0) {
             try {
                 Thread.sleep(20);
             }
@@ -121,17 +154,19 @@ public class GameThread extends Applet implements Runnable, KeyListener{
             //update the game loop
             repaint();
         }
+       
     }
       
 	//stop thread
       public void stop() {
           gameloop = null;
+          
       }
       
     public void transformOctopi(double x, double y,  int i){
     	octopi_array[i].setX(x);
     	octopi_array[i].setY(y-1);
-	    if(currentFrameOctopi<20){
+	    if(currentFrameOctopi<100){
 	    	octopi_array[i].load("octopi2.png");
 	    }
 	    else{
@@ -142,7 +177,7 @@ public class GameThread extends Applet implements Runnable, KeyListener{
 	    octopi_array[i].draw();
 	    octopi_array[i].transform();
 		currentFrameOctopi++;
-		if(currentFrameOctopi==40){
+		if(currentFrameOctopi==200){
 			currentFrameOctopi=0;
 		}
 		
@@ -153,24 +188,23 @@ public class GameThread extends Applet implements Runnable, KeyListener{
 	
     }
     
-    public boolean collisionOccured(int objectOneX, int objectOneY, int objectTwoX, int objectTwoY, double objectOneWidth, double objectTwoWidth, double objectOneHeight, double objectTwoHeight){
-    	for(int i=0; i<objectOneWidth; i++){
-    		for(int j=0; j<objectTwoWidth; j++){
-	    		if(objectOneX+i==objectTwoX+j){
-	    			return true;
-	    		}
-    		}
-    	}
-    	for(int u=0; u<objectOneHeight; u++){
-    		for(int v=0; v<objectTwoHeight; v++){
-	    		if(objectOneY+u==objectTwoY+v){
-	    			return true;
-	    		}
-    		}
+    
+    public boolean collision(Rectangle objectOne, Rectangle objectTwo ){
+    	
+    	if( objectOne.intersects(objectTwo)){
+    		return true;
     	}
     	
     	return false;
     }
+    
+    public void gameOver(){
+    	graphics.setColor(Color.BLACK);
+        graphics.fillRect(0, 0, getSize().width, getSize().height);
+        graphics.setColor(Color.RED);
+        graphics.drawString("GAME OVER", getSize().width/2, getSize().height/2);
+    }
+    
 	@Override
 	public void keyPressed(KeyEvent k) {
 		// TODO Auto-generated method stub
