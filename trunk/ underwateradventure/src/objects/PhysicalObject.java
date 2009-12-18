@@ -20,7 +20,7 @@ public class PhysicalObject {
 	protected double scaleX,scaleY = 1;
 	
 	
-	PhysicalObject(Applet a){
+	public PhysicalObject(Applet a){
 		applet = a;
 	}
 	//getters and setters
@@ -92,6 +92,9 @@ public class PhysicalObject {
 	{
 		this.image = image;
 	}
+	public Image getImage(){
+		return image;
+	}
 	protected URL getURL(String filename)
 	{
 		URL url = null;
@@ -111,10 +114,11 @@ public class PhysicalObject {
 	public void load(String filename)
 	{
 		setImage(applet.getImage(getURL(filename)));
-		double x = applet.getSize().width/2 - getWidth()/2;
-		double y = applet.getSize().height/2 - getHeight()/2;
+		//double x = applet.getSize().width/2 - getWidth()/2;
+		//double y = applet.getSize().height/2 - getHeight()/2;
 		at = AffineTransform.getTranslateInstance(x, y);
 	}
+	
 	//set reference to drawing object
 	public void setGraphics(Graphics2D g)
 	{
