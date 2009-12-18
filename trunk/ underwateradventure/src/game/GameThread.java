@@ -28,7 +28,7 @@ public class GameThread extends Applet implements Runnable, KeyListener{
     Random randomY=new Random();
     
     int life=500;
-    
+    boolean shotTaken=false;
     
     PhysicalObject octopi_array[]={	new PhysicalObject(this),
     								new PhysicalObject(this),
@@ -38,18 +38,13 @@ public class GameThread extends Applet implements Runnable, KeyListener{
     								new PhysicalObject(this),
     								new PhysicalObject(this),
     							   };	
+    
+    PhysicalObject torpedo=new PhysicalObject(this);
    
-
-    
-	int currentX=0;
-	int currentY=0;
-	int lastX;
-	int lastY;
-    
     int appletSizeX = 1000;
     int appletSizeY = 400;
     AffineTransform ident = new AffineTransform();
-    boolean showBounds=true;
+    boolean showBounds;
     int change;
     
     int currentFrameOctopi=0;
@@ -64,10 +59,16 @@ public class GameThread extends Applet implements Runnable, KeyListener{
 		player.load("sub.png");
 		player.setX(200);
 		player.setY(175);
-		player.setWidth(122);
-		player.setHeight(70);
+		player.setWidth(127);
+		player.setHeight(75);
 		
-
+		torpedo.setGraphics(graphics);
+		torpedo.load("torpedo.png");
+		torpedo.setWidth(44);
+		torpedo.setHeight(16);
+		torpedo.setX(player.getX()+110);
+		torpedo.setY(player.getY()+45);
+		
 		octopi_array[0].setGraphics(graphics);
 		octopi_array[0].load("octopi2.png");
 		octopi_array[0].setWidth(88);
@@ -119,6 +120,10 @@ public class GameThread extends Applet implements Runnable, KeyListener{
     		for(int i=0; i<octopi_array.length; i++){
     			octopi_array[i].drawBounds();
     		}
+    	}
+    	
+    	if(shotTaken==true){
+    		drawShot(torpedo.getX(), torpedo.getY());
     	}
     	
     	if(life<0){
@@ -188,7 +193,59 @@ public class GameThread extends Applet implements Runnable, KeyListener{
 	
     }
     
-    
+    public void drawShot(double x, double y){
+    	if(torpedo.getX()>1000){
+    		shotTaken=false;
+    	}
+    	else if(collision(octopi_array[0].getBounds(),torpedo.getBounds())){
+    		octopi_array[0].setY(500);
+    		shotTaken=false;
+    		
+    		explosionAnimation();
+    	}
+    	else if(collision(octopi_array[1].getBounds(),torpedo.getBounds())){
+    		octopi_array[1].setY(500);
+    		shotTaken=false;
+    		explosionAnimation();
+    	}
+    	else if(collision(octopi_array[2].getBounds(),torpedo.getBounds())){
+    		octopi_array[2].setY(500);
+    		shotTaken=false;
+    		explosionAnimation();
+    	}
+    	else if(collision(octopi_array[3].getBounds(),torpedo.getBounds())){
+    		octopi_array[3].setY(500);
+    		shotTaken=false;
+    		explosionAnimation();
+    	}
+    	else if(collision(octopi_array[4].getBounds(),torpedo.getBounds())){
+    		octopi_array[4].setY(500);
+    		shotTaken=false;
+    		explosionAnimation();
+    	}
+    	else if(collision(octopi_array[5].getBounds(),torpedo.getBounds())){
+    		octopi_array[5].setY(500);
+    		shotTaken=false;
+    		explosionAnimation();
+    	}
+    	else if(collision(octopi_array[6].getBounds(),torpedo.getBounds())){
+    		octopi_array[6].setY(500);
+    		shotTaken=false;
+    		explosionAnimation();
+    	}
+    	else{
+    		torpedo.setX(x+8);
+        	torpedo.setY(y);
+    	}
+    	torpedo.draw();
+    	torpedo.transform();
+    	
+    	
+    	
+    }
+    public void explosionAnimation(){
+    	
+    }
     public boolean collision(Rectangle objectOne, Rectangle objectTwo ){
     	
     	if( objectOne.intersects(objectTwo)){
@@ -198,12 +255,15 @@ public class GameThread extends Applet implements Runnable, KeyListener{
     	return false;
     }
     
+   
+    
     public void gameOver(){
     	graphics.setColor(Color.BLACK);
         graphics.fillRect(0, 0, getSize().width, getSize().height);
         graphics.setColor(Color.RED);
         graphics.drawString("GAME OVER", getSize().width/2, getSize().height/2);
     }
+    
     
 	@Override
 	public void keyPressed(KeyEvent k) {
@@ -213,7 +273,6 @@ public class GameThread extends Applet implements Runnable, KeyListener{
 		
 		if(KeyEvent.VK_LEFT == key)
             player.keyLeft();
-
 
 		if(KeyEvent.VK_UP == key)
             player.keyUp();
@@ -226,6 +285,12 @@ public class GameThread extends Applet implements Runnable, KeyListener{
 		
 		if(KeyEvent.VK_B == key)
 			showBounds = !showBounds;
+		
+		if(KeyEvent.VK_SPACE==key){
+			torpedo.setY(player.getY()+45);
+			torpedo.setX(player.getX()+110);
+			shotTaken=true;
+		}
 
 	}
 	@Override
