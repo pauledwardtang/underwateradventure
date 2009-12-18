@@ -40,14 +40,14 @@ public class GameThread extends Applet implements Runnable, KeyListener{
     							   };	
     
     PhysicalObject torpedo=new PhysicalObject(this);
-   
+ 
     int appletSizeX = 1000;
     int appletSizeY = 400;
     AffineTransform ident = new AffineTransform();
     boolean showBounds;
     int change;
     
-    int currentFrameOctopi=0;
+    int currentFrame=0;
     public void init()
 	{
     	
@@ -68,6 +68,8 @@ public class GameThread extends Applet implements Runnable, KeyListener{
 		torpedo.setHeight(16);
 		torpedo.setX(player.getX()+110);
 		torpedo.setY(player.getY()+45);
+		
+	
 		
 		octopi_array[0].setGraphics(graphics);
 		octopi_array[0].load("octopi2.png");
@@ -92,6 +94,9 @@ public class GameThread extends Applet implements Runnable, KeyListener{
 			}
 			
     	}
+    	
+    
+		
 		
 	}
     public void update(Graphics g){
@@ -101,19 +106,27 @@ public class GameThread extends Applet implements Runnable, KeyListener{
     	Color C = new Color(0,0,255);
 		graphics.setColor(C);
     	graphics.fillRect(0, 0, getSize().width, getSize().height);
+    	graphics.setColor(Color.WHITE);
+    	graphics.drawString("Life: "+life, 925, 390);
     	player.draw();
     	player.transform();
+    	player.load("sub.png");
     	
     	for(int i=0; i<octopi_array.length; i++){
     		transformOctopi(octopi_array[i].getX(), octopi_array[i].getY(), i);
     	}
-    	
+
     	for(int i=0; i<octopi_array.length; i++){
     		if(collision(octopi_array[i].getBounds(),player.getBounds())){
     			life=life-1;
+    			player.load("hurtsub.png");
     			
     		}
+    		
     	}
+    	
+    
+    	
     	graphics.setColor(Color.ORANGE);
     	if(showBounds){
     		player.drawBounds();
@@ -165,13 +178,11 @@ public class GameThread extends Applet implements Runnable, KeyListener{
 	//stop thread
       public void stop() {
           gameloop = null;
-          
       }
-      
     public void transformOctopi(double x, double y,  int i){
     	octopi_array[i].setX(x);
     	octopi_array[i].setY(y-1);
-	    if(currentFrameOctopi<100){
+	    if(currentFrame<100){
 	    	octopi_array[i].load("octopi2.png");
 	    }
 	    else{
@@ -181,13 +192,19 @@ public class GameThread extends Applet implements Runnable, KeyListener{
 	    
 	    octopi_array[i].draw();
 	    octopi_array[i].transform();
-		currentFrameOctopi++;
-		if(currentFrameOctopi==200){
-			currentFrameOctopi=0;
+		currentFrame++;
+		if(currentFrame==200){
+			currentFrame=0;
 		}
 		
 		if(octopi_array[i].getY()==-50){
 			octopi_array[i].setY(450);
+			octopi_array[i].setX(randomX.nextInt(1000));
+			for(int j=0; j<i; j++){
+				while(collision(octopi_array[i].getBounds(), octopi_array[j].getBounds())){
+					octopi_array[i].setX(randomX.nextInt(1000));
+				}
+			}
 		}
 			
 	
