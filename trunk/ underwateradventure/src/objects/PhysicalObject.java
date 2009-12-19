@@ -19,7 +19,7 @@ public class PhysicalObject {
 	protected double velX, velY;
 	protected double moveAngle, faceAngle;
 	protected double scaleX,scaleY = 1;
-	
+	protected boolean isAlive;
 	
 	public PhysicalObject(Applet a){
 		applet = a;
@@ -59,13 +59,13 @@ public class PhysicalObject {
 	public void draw(){
 		graphics.drawImage(image, at, applet);
 	}
-	/*public double getWidth(){
+	public double getWidth(){
 		return image.getWidth(applet);
 	}
 	public double getHeight(){
 		return image.getHeight(applet);
-	}*/
-	public double getWidth(){
+	}
+/*	public double getWidth(){
 		return width;
 	}
 	public double getHeight(){
@@ -77,19 +77,19 @@ public class PhysicalObject {
 	public void setHeight(double height){
 		this.height=height;
 	}
-	/*public double getCenterX()
+	*/
+	public double getCenterX()
 	{
 		return getX() + getWidth() /2;
 	}
 	public double getCenterY()
 	{
 		return getY() + getHeight() /2;
-	}*/
+	}
 	//binding rectangle
 	public Rectangle getBounds(){
 		Rectangle r;
-        //r = new Rectangle((int)getCenterX(), (int) getCenterY(), (int) getWidth(), (int) getHeight());
-		r = new Rectangle(((int)this.getX()), ((int) this.getY()), ((int) this.getWidth()), ((int) this.getHeight()));
+        r = new Rectangle((int)getX(),(int)getY(),(int)getWidth(),(int)getHeight());
 		return r;
 	}
 	//draws binding rectangle
@@ -137,5 +137,24 @@ public class PhysicalObject {
 	public void setGraphics(Graphics2D g)
 	{
 		graphics = g;
+	}
+	//increment vel and position by increments
+	public void incVelX(double i){
+		velX += i;
+	}
+	public void incVelY(double i){
+		velY += i;
+	}
+	public void incX(double i){
+		x += i;
+	}
+	public void incY(double i){
+		y += i;
+	}
+	public boolean isAlive(){
+		return isAlive;
+	}
+	public void setAlive(boolean b){
+		isAlive = b;
 	}
 }
