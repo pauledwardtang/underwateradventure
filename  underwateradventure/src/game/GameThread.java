@@ -11,6 +11,8 @@ import java.awt.event.KeyListener;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Random;
 
 import objects.PhysicalObject;
@@ -26,21 +28,18 @@ public class GameThread extends Applet implements Runnable, KeyListener{
     
     Random randomX=new Random();
     Random randomY=new Random();
-    
     int life=500;
     boolean shotTaken=false;
+    boolean shotReleased = true;
+
+    //octopuses? octopi?
+    int OCTOPI = 5;
+    PhysicalObject octopi[] = new PhysicalObject[OCTOPI];                                              
+    //torpedoes
+    int TORPEDOES = 50;
+    PhysicalObject[] torpedoes = new PhysicalObject[TORPEDOES];
+    int currentTorpedo = 0;
     
-    PhysicalObject octopi_array[]={	new PhysicalObject(this),
-    								new PhysicalObject(this),
-    								new PhysicalObject(this),
-    								new PhysicalObject(this),
-    								new PhysicalObject(this),
-    								new PhysicalObject(this),
-    								new PhysicalObject(this),
-    							   };	
-    
-    PhysicalObject torpedo=new PhysicalObject(this);
- 
     int appletSizeX = 1000;
     int appletSizeY = 400;
     AffineTransform ident = new AffineTransform();
@@ -50,95 +49,61 @@ public class GameThread extends Applet implements Runnable, KeyListener{
     int currentFrame=0;
     public void init()
 	{
-    	
+    	//applet size setup
     	setSize(appletSizeX,appletSizeY);
     	addKeyListener(this);
     	backbuffer = new BufferedImage(appletSizeX, appletSizeY, BufferedImage.TYPE_INT_RGB);
 		graphics = backbuffer.createGraphics();
+		
+		//player initializiation
 		player.setGraphics(graphics);
 		player.load("sub.png");
-		player.setX(200);
-		player.setY(175);
-		player.setWidth(127);
-		player.setHeight(75);
+		player.setX(appletSizeX/2);
+		player.setY(appletSizeY/2);
 		
-		torpedo.setGraphics(graphics);
-		torpedo.load("torpedo.png");
-		torpedo.setWidth(44);
-		torpedo.setHeight(16);
-		torpedo.setX(player.getX()+110);
-		torpedo.setY(player.getY()+45);
-		
-	
-		
-		octopi_array[0].setGraphics(graphics);
-		octopi_array[0].load("octopi2.png");
-		octopi_array[0].setWidth(88);
-		octopi_array[0].setHeight(92);
-		octopi_array[0].setX(100);
-		octopi_array[0].setY(randomY.nextInt(400));		
-		
-    	for(int i=1; i<octopi_array.length; i++){
-			octopi_array[i].setGraphics(graphics);
-			octopi_array[i].load("octopi2.png");
-			octopi_array[i].setWidth(88);
-			octopi_array[i].setHeight(92);
-			octopi_array[i].setX(randomX.nextInt(1000));
-			octopi_array[i].setY(randomY.nextInt(400));
+		 //torpedos initialization
+        for (int i = 0; i<torpedoes.length; i++) {
+            torpedoes[i] = new PhysicalObject(this);
+            torpedoes[i].setGraphics(graphics);
+            torpedoes[i].load("torpedo.png");
+            torpedoes[i].setX(appletSizeX+100);
+            torpedoes[i].setY(appletSizeY+100);       
+        }	
+		//octopus initializtion
+		for(int i = 0; i<octopi.length; i++){
+			octopi[i] = new PhysicalObject(this);
+			octopi[i].setGraphics(graphics);
+			octopi[i].load("octopi2.png");
+			octopi[i].setX(randomX.nextInt(1000));
+			octopi[i].setY(randomY.nextInt(200)+appletSizeY);  
 			for(int j=0; j<i; j++){
-				while(collision(octopi_array[i].getBounds(), player.getBounds())||collision(octopi_array[i].getBounds(), octopi_array[j].getBounds())){
-					octopi_array[i].setX(randomX.nextInt(1000));
-					octopi_array[i].setY(randomY.nextInt(400));
-					
+				while(collision(octopi[i].getBounds(), player.getBounds())||collision(octopi[i].getBounds(), octopi[j].getBounds())){
+					octopi[i].setX(randomX.nextInt(1000));
+					octopi[i].setY(randomY.nextInt(200)+appletSizeY);
 				}
 			}
-			
-    	}
-    	
-    
-		
-		
+		}	
 	}
     public void update(Graphics g){
     	
     	graphics.setTransform(ident);
-    	
     	Color C = new Color(0,0,255);
 		graphics.setColor(C);
     	graphics.fillRect(0, 0, getSize().width, getSize().height);
+    	player.updatePosition();
     	graphics.setColor(Color.WHITE);
     	graphics.drawString("Life: "+life, 925, 390);
     	player.draw();
     	player.transform();
     	player.load("sub.png");
     	
-    	for(int i=0; i<octopi_array.length; i++){
-    		transformOctopi(octopi_array[i].getX(), octopi_array[i].getY(), i);
-    	}
-
-    	for(int i=0; i<octopi_array.length; i++){
-    		if(collision(octopi_array[i].getBounds(),player.getBounds())){
-    			life=life-1;
-    			player.load("hurtsub.png");
-    			
-    		}
-    		
-    	}
-    	
-    
-    	
+    	updateOctopi();
+    	//decreases speed after movement
+    	player.decreaseSpeed();
+    	drawBounds();
     	graphics.setColor(Color.ORANGE);
-    	if(showBounds){
-    		player.drawBounds();
-    		for(int i=0; i<octopi_array.length; i++){
-    			octopi_array[i].drawBounds();
-    		}
-    	}
-    	
-    	if(shotTaken==true){
-    		drawShot(torpedo.getX(), torpedo.getY());
-    	}
-    	
+    	drawTorpedoes();
+    	collisions();
     	if(life<0){
     		gameOver();
     	}
@@ -179,88 +144,68 @@ public class GameThread extends Applet implements Runnable, KeyListener{
       public void stop() {
           gameloop = null;
       }
-    public void transformOctopi(double x, double y,  int i){
-    	octopi_array[i].setX(x);
-    	octopi_array[i].setY(y-1);
+    public void updateOctopi(){
+    	for(int i = 0; i<octopi.length; i++){
+    	octopi[i].setY(octopi[i].getY()-1);
 	    if(currentFrame<100){
-	    	octopi_array[i].load("octopi2.png");
+	    	octopi[i].load("octopi2.png");
 	    }
 	    else{
-	    	octopi_array[i].load("octopi.png");
+	    	octopi[i].load("octopi.png");
 	    }
-    	
-	    
-	    octopi_array[i].draw();
-	    octopi_array[i].transform();
+	    octopi[i].transform();
+	    octopi[i].draw();
 		currentFrame++;
 		if(currentFrame==200){
 			currentFrame=0;
 		}
 		
-		if(octopi_array[i].getY()==-50){
-			octopi_array[i].setY(450);
-			octopi_array[i].setX(randomX.nextInt(1000));
+		if(octopi[i].getY()==-50){
+			octopi[i].setY(appletSizeY+100);
+			octopi[i].setX(randomX.nextInt(1000));
 			for(int j=0; j<i; j++){
-				while(collision(octopi_array[i].getBounds(), octopi_array[j].getBounds())){
-					octopi_array[i].setX(randomX.nextInt(1000));
+				while(collision(octopi[i].getBounds(), octopi[j].getBounds())){
+					octopi[i].setX(randomX.nextInt(1000));
 				}
 			}
-		}
-			
+		  }
+    	}
 	
     }
+    //detects all collisions
+    public void collisions(){
+    	//torpedo collisions
+    	for(int i = 0; i<torpedoes.length; i++)
+    	{
+    		if(torpedoes[i].getX()>appletSizeX)
+    		{
+    			torpedoes[i].setAlive(false);
+    			torpedoes[i].setvelX(0);
+    		}
+    	//checks every octopi for collisions
+    	for(int j = 0; j<octopi.length; j++){
+    		if(collision(octopi[j].getBounds(),torpedoes[i].getBounds())){
+    			octopi[j].setY(500);
+    			octopi[j].setX(randomX.nextInt(1000));
+    			torpedoes[i].setAlive(false);
+    			torpedoes[i].setvelX(0);
+    			torpedoes[i].setX(appletSizeX+100);
+    		   }
+    	    }
+    	}
+    	for(int i=0; i<octopi.length; i++){
+    		if(collision(octopi[i].getBounds(),player.getBounds())){
+    			life=life-1;
+    			player.load("hurtsub.png");
+    		}	
+    	}
+      }	
     
-    public void drawShot(double x, double y){
-    	if(torpedo.getX()>1000){
-    		shotTaken=false;
-    	}
-    	else if(collision(octopi_array[0].getBounds(),torpedo.getBounds())){
-    		octopi_array[0].setY(500);
-    		shotTaken=false;
-    		
-    		explosionAnimation();
-    	}
-    	else if(collision(octopi_array[1].getBounds(),torpedo.getBounds())){
-    		octopi_array[1].setY(500);
-    		shotTaken=false;
-    		explosionAnimation();
-    	}
-    	else if(collision(octopi_array[2].getBounds(),torpedo.getBounds())){
-    		octopi_array[2].setY(500);
-    		shotTaken=false;
-    		explosionAnimation();
-    	}
-    	else if(collision(octopi_array[3].getBounds(),torpedo.getBounds())){
-    		octopi_array[3].setY(500);
-    		shotTaken=false;
-    		explosionAnimation();
-    	}
-    	else if(collision(octopi_array[4].getBounds(),torpedo.getBounds())){
-    		octopi_array[4].setY(500);
-    		shotTaken=false;
-    		explosionAnimation();
-    	}
-    	else if(collision(octopi_array[5].getBounds(),torpedo.getBounds())){
-    		octopi_array[5].setY(500);
-    		shotTaken=false;
-    		explosionAnimation();
-    	}
-    	else if(collision(octopi_array[6].getBounds(),torpedo.getBounds())){
-    		octopi_array[6].setY(500);
-    		shotTaken=false;
-    		explosionAnimation();
-    	}
-    	else{
-    		torpedo.setX(x+8);
-        	torpedo.setY(y);
-    	}
-    	torpedo.draw();
-    	torpedo.transform();
-    	
-    	
-    	
-    }
-    public void explosionAnimation(){
+    private boolean collison() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	public void explosionAnimation(){
     	
     }
     public boolean collision(Rectangle objectOne, Rectangle objectTwo ){
@@ -272,7 +217,16 @@ public class GameThread extends Applet implements Runnable, KeyListener{
     	return false;
     }
     
-   
+    public void drawTorpedoes() {
+        for (int i = 0; i < TORPEDOES; i++) {
+           if (torpedoes[i].isAlive()) {
+                //draw the torps
+        		torpedoes[i].incX(torpedoes[i].getvelX());
+                torpedoes[i].transform();
+                torpedoes[i].draw();
+            }
+        }
+    }
     
     public void gameOver(){
     	graphics.setColor(Color.BLACK);
@@ -280,46 +234,85 @@ public class GameThread extends Applet implements Runnable, KeyListener{
         graphics.setColor(Color.RED);
         graphics.drawString("GAME OVER", getSize().width/2, getSize().height/2);
     }
-    
+    public void drawBounds(){
+    	if(showBounds){
+        	player.drawBounds();
+        	for(int i=0; i<octopi.length; i++){
+        		octopi[i].drawBounds();
+        	}
+        	for(int i = 0; i<torpedoes.length; i++){
+        			torpedoes[i].drawBounds();
+        		}
+    	}
+    }
     
 	@Override
 	public void keyPressed(KeyEvent k) {
 		// TODO Auto-generated method stub
 		int key = k.getKeyCode();
-		
-		
-		if(KeyEvent.VK_LEFT == key)
+
+		if(KeyEvent.VK_LEFT == key){
             player.keyLeft();
-
-		if(KeyEvent.VK_UP == key)
+            player.setThrust(true);
+		}
+		if(KeyEvent.VK_UP == key){
             player.keyUp();
-
-		if(KeyEvent.VK_DOWN == key)
+            player.setThrust(true);
+		}
+		if(KeyEvent.VK_DOWN == key){
             player.keyDown();
-		
-		if(KeyEvent.VK_RIGHT == key)
+			player.setThrust(true);
+		}
+		if(KeyEvent.VK_RIGHT == key){
             player.keyRight();
-		
+            player.setThrust(true);
+		}
 		if(KeyEvent.VK_B == key)
 			showBounds = !showBounds;
 		
 		if(KeyEvent.VK_SPACE==key){
-			torpedo.setY(player.getY()+45);
-			torpedo.setX(player.getX()+110);
+			if(shotReleased){
+			//fire a bullet
+            currentTorpedo++;
+            if (currentTorpedo > TORPEDOES - 1) currentTorpedo = 0;
+            torpedoes[currentTorpedo].setX(player.getX()+player.getWidth());
+            torpedoes[currentTorpedo].setY(player.getY()+player.getHeight()/2);
+            torpedoes[currentTorpedo].setvelX(8);
+            torpedoes[currentTorpedo].setAlive(true);
 			shotTaken=true;
+			shotReleased = false;
+			}
 		}
 
 	}
 	@Override
-	public void keyReleased(KeyEvent e) {
+	public void keyReleased(KeyEvent k) {
 		// TODO Auto-generated method stub
+	int key = k.getKeyCode();
 		
+		
+		if(KeyEvent.VK_LEFT == key)
+		{
+			player.setThrust(false);
+		}	
+		if(KeyEvent.VK_UP == key)
+		{
+			player.setThrust(false);
+		}
+		if(KeyEvent.VK_DOWN == key)
+		{
+			player.setThrust(false);
+		}
+		if(KeyEvent.VK_RIGHT == key)
+		{		
+			player.setThrust(false);
+		}
+		if(KeyEvent.VK_SPACE == key)
+			shotReleased = true;
 	}
 	@Override
-	public void keyTyped(KeyEvent e) {
-		// TODO Auto-generated method stub
+	public void keyTyped(KeyEvent k) {
 		
 	}
-	
-	
+
 }
