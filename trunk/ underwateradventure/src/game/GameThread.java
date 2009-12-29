@@ -31,7 +31,7 @@ public class GameThread extends Applet implements Runnable, KeyListener{
     int life=500;
     boolean shotTaken=false;
     boolean shotReleased = true;
-
+    PhysicalObject backdrop1=new PhysicalObject(this);
     //octopuses? octopi?
     int OCTOPI = 5;
     PhysicalObject octopi[] = new PhysicalObject[OCTOPI];                                              
@@ -47,6 +47,8 @@ public class GameThread extends Applet implements Runnable, KeyListener{
     int change;
     
     int currentFrame=0;
+    int currentX=0;
+    boolean dark=false;
     public void init()
 	{
     	//applet size setup
@@ -61,6 +63,10 @@ public class GameThread extends Applet implements Runnable, KeyListener{
 		player.setX(appletSizeX/2);
 		player.setY(appletSizeY/2);
 		
+		backdrop1.setGraphics(graphics);
+		backdrop1.load("background1.png");
+		backdrop1.setX(0);
+		backdrop1.setY(0);
 		 //torpedos initialization
         for (int i = 0; i<torpedoes.length; i++) {
             torpedoes[i] = new PhysicalObject(this);
@@ -87,16 +93,25 @@ public class GameThread extends Applet implements Runnable, KeyListener{
     public void update(Graphics g){
     	
     	graphics.setTransform(ident);
-    	Color C = new Color(0,0,255);
+    	/*Color C = new Color(0,0,255);
 		graphics.setColor(C);
-    	graphics.fillRect(0, 0, getSize().width, getSize().height);
+    	graphics.fillRect(0, 0, getSize().width, getSize().height);*/
+    	backdrop1.transform();
+    	backdrop1.setX(currentX);
+    	backdrop1.draw();
+    	
     	player.updatePosition();
     	graphics.setColor(Color.WHITE);
     	graphics.drawString("Life: "+life, 925, 390);
+    	
     	player.draw();
     	player.transform();
-    	player.load("sub.png");
-    	
+    	if(!dark){
+    		player.load("sub.png");
+    	}
+    	else{
+    		player.load("darksub.png");
+    	}
     	updateOctopi();
     	//decreases speed after movement
     	player.decreaseSpeed();
@@ -109,8 +124,25 @@ public class GameThread extends Applet implements Runnable, KeyListener{
     	}
 		paint(g);
 		
+		if(currentX>-1500)
+			currentX--;
+		if(currentX<=-1500&&player.getX()>=800&&player.getY()>=240)
+			updateGraphics();
+		
 	}
-	
+	public void updateGraphics(){
+		System.out.print("UpdateGame worked");
+		player.setGraphics(graphics);
+		player.load("darksub.png");
+		player.setX(0);
+		player.setY(appletSizeY/2);
+		backdrop1.setGraphics(graphics);
+		backdrop1.load("darkbackdrop.png");
+		backdrop1.setX(0);
+		backdrop1.setY(0);
+		currentX=0;
+		dark=true;
+	}
 	//sets up buffered image
 	public void paint(Graphics g)
 	{	
